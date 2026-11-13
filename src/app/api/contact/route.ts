@@ -22,13 +22,13 @@ export async function POST(request: Request) {
   if (Object.keys(errors).length) return NextResponse.json({ ok: false, code: "invalid", errors }, { status: 422 });
 
   const reference = newReference("C");
-  const { result, status } = await sendInquiry({
+  const { result } = await sendInquiry({
     reference,
     subject: `[${reference}] Contact: ${c.topic || "General question"} · ${c.name}`.slice(0, 200),
     heading: "New contact message from autumnstar.ca",
     rows: contactRows(c),
     replyTo: c.email,
   });
-  if (result !== "sent") return NextResponse.json({ ok: false, code: result, ...(status ? { providerStatus: status } : {}) }, { status: result === "not_configured" ? 503 : 502 });
+  if (result !== "sent") return NextResponse.json({ ok: false, code: result }, { status: result === "not_configured" ? 503 : 502 });
   return NextResponse.json({ ok: true, reference });
 }

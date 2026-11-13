@@ -38,7 +38,7 @@ export function newReference(kind: "Q" | "C"): string {
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-/** "failed" carries Mailgun's HTTP status (e.g. 401 bad key, 403 domain not allowed/unverified, 404 unknown domain) for diagnosis. */
+/** Mailgun's HTTP status on failure, for server-side diagnosis only (also written to the server log). Never sent to the browser. */
 export type SendResult = { result: "sent" | "not_configured" | "failed"; status?: number };
 
 export async function sendInquiry(opts: { subject: string; heading: string; rows: [string, string][]; replyTo: string; reference: string }): Promise<SendResult> {
