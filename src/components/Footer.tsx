@@ -9,7 +9,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <Image src="/brand/logo-white.png" alt={site.displayName} width={1000} height={250} />
+          <Image src="/brand/logo-white.png" alt={site.displayName} width={1056} height={306} />
           <p className="footer-tagline">{site.tagline}</p>
           <p>{site.description}</p>
         </div>

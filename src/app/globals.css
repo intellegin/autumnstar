@@ -89,7 +89,7 @@ button { font: inherit; color: inherit; }
 /* ---------- Header ---------- */
 .site-header { position: sticky; top: 0; z-index: 100; background: var(--white); border-bottom: 1px solid var(--line); }
 .header-inner { display: flex; align-items: center; gap: 2rem; height: var(--header-h); }
-.brand img { height: 46px; width: auto; }
+.brand img { height: 56px; width: auto; }
 .nav { display: flex; align-items: center; gap: 0.25rem; margin-left: auto; position: relative; }
 .nav > a, .nav-trigger {
   display: inline-flex; align-items: center; gap: 0.3rem; min-height: 44px; padding: 0 0.9rem; border: 0; border-radius: var(--radius);
@@ -323,7 +323,7 @@ button { font: inherit; color: inherit; }
 /* ---------- Footer ---------- */
 .site-footer { background: var(--navy-950); color: rgba(255, 255, 255, 0.76); font-size: 0.96rem; }
 .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 2.5rem; padding: 4rem 0 3rem; }
-.footer-brand img { width: 230px; height: auto; margin-bottom: 1.25rem; }
+.footer-brand img { width: 244px; height: auto; margin: -6px 0 1.25rem -7px; }
 .footer-brand p { max-width: 36ch; }
 .footer-tagline { font-family: var(--font-head); font-weight: 600; color: var(--gold); letter-spacing: -0.01em; }
 .footer-h { font: 600 1rem/1.2 var(--font-head); color: var(--white); margin: 0 0 1rem; }
@@ -344,7 +344,7 @@ button { font: inherit; color: inherit; }
 
 @media (max-width: 1023px) {
   :root { --header-h: 68px; }
-  .brand img { height: 38px; }
+  .brand img { height: 48px; }
   .nav, .header-cta { display: none; }
   .header-inner { justify-content: space-between; }
   .menu-btn { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 48px; padding: 0 1rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--white); color: var(--navy); font-weight: 600; cursor: pointer; }
