@@ -1,0 +1,17 @@
+{
+  "_help": "Site-wide settings. Empty values are hidden on the site. See README.md.",
+  "displayName": "Autumn Star Shipping & Logistics",
+  "shortName": "Autumn Star",
+  "tagline": "Moving Business Across Borders.",
+  "description": "Autumn Star arranges ocean freight worldwide, plus air freight, ground transportation, freight coordination and supply chain support for importers, exporters and growing businesses. Request a quote.",
+  "url": "https://www.autumnstar.ca",
+  "_contactHelp": "TODO (owner): add phone (E.164, e.g. +16045550100), email and address when confirmed. Each stays hidden while empty.",
+  "contact": { "phone": "", "email": "", "address": "" },
+  "nav": [
+    { "label": "Services", "href": "/services" },
+    { "label": "Global Reach", "href": "/global-reach" },
+    { "label": "About", "href": "/about" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "quoteCta": { "label": "Request a Quote", "href": "/quote" }
+}

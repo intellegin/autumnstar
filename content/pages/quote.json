@@ -1,0 +1,31 @@
+{
+  "seo": {
+    "title": "Request a Quote",
+    "description": "Request a shipping quote from Autumn Star for ocean freight, air freight or ground transportation."
+  },
+  "hero": {
+    "title": "Request a quote",
+    "text": "Four short steps. The more detail you share, the more accurate the quote.",
+    "image": "/images/photos/quote-container-rows.jpg",
+    "imageAlt": "Rows of shipping containers seen from above"
+  },
+  "modes": [
+    { "value": "Ocean", "label": "Ocean freight", "icon": "ship", "types": ["Full container (FCL)", "Shared container (LCL)", "Not sure"] },
+    { "value": "Air", "label": "Air freight", "icon": "plane", "types": ["Standard air cargo", "Urgent / time-critical", "Not sure"] },
+    { "value": "Ground", "label": "Ground", "icon": "truck", "types": ["Full truckload", "Partial truckload", "Parcel", "Last-mile delivery", "Not sure"] },
+    { "value": "Not sure", "label": "Not sure yet", "icon": "route", "types": [] }
+  ],
+  "directions": ["Import", "Export", "Domestic", "Other"],
+  "packaging": ["Pallets", "Cartons / boxes", "Crates", "Containers", "Loose / other"],
+  "weightUnits": ["kg", "lb"],
+  "aside": {
+    "title": "What happens next",
+    "items": [
+      "You'll get a reference number as soon as you send your request.",
+      "We review the details and may follow up with questions.",
+      "We send options and a quote by email."
+    ]
+  },
+  "successText": "Thanks. Your request has been received. Keep this reference number for any follow-up.",
+  "errorText": "Sorry, your request could not be sent. Please try again later."
+}

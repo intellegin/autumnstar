@@ -1,0 +1,59 @@
+{
+  "seo": {
+    "title": "Ocean Freight & International Shipping",
+    "description": "Autumn Star arranges ocean freight worldwide, plus air freight, ground transportation and freight coordination for importers, exporters and growing businesses. Request a quote."
+  },
+  "hero": {
+    "title": "Moving Business Across Borders.",
+    "text": "Ocean freight worldwide, plus air, ground and the coordination that connects them. Tell us what you're shipping and we'll plan the move.",
+    "image": "/images/photos/hero-container-ship-aerial.jpg",
+    "imageAlt": "Container ship sailing across open ocean, seen from above",
+    "primaryCta": { "label": "Request a Quote", "href": "/quote" },
+    "secondaryCta": { "label": "Explore services", "href": "/services" }
+  },
+  "quickQuote": {
+    "title": "Start a quote",
+    "modes": [
+      { "value": "Ocean", "label": "Ocean", "icon": "ship" },
+      { "value": "Air", "label": "Air", "icon": "plane" },
+      { "value": "Ground", "label": "Ground", "icon": "truck" }
+    ]
+  },
+  "services": {
+    "title": "Shipping services",
+    "text": "Ocean freight leads. Air, ground, coordination and supply chain support fill in the rest of the route."
+  },
+  "process": {
+    "title": "How a shipment comes together",
+    "steps": [
+      { "icon": "clipboard", "title": "Share the details", "text": "Origin, destination, cargo and timing, through the quote form." },
+      { "icon": "route", "title": "We plan the route", "text": "We look at the mode and the connections that fit your shipment." },
+      { "icon": "doc", "title": "You approve the quote", "text": "Clear pricing and options before anything moves." },
+      { "icon": "ship", "title": "We coordinate the move", "text": "From pickup to delivery, with one point of contact." }
+    ]
+  },
+  "audience": {
+    "title": "Built for businesses that trade",
+    "text": "Autumn Star works with companies that move goods across borders and within the country.",
+    "items": [
+      "Importers and exporters",
+      "Manufacturers and wholesalers",
+      "Distributors and trading companies",
+      "Businesses sourcing products internationally",
+      "Companies with recurring freight"
+    ],
+    "image": "/images/photos/ship-loading-aerial.jpg",
+    "imageAlt": "Container ship being loaded at a terminal, seen from above"
+  },
+  "global": {
+    "title": "A worldwide focus",
+    "text": "Our ocean freight focus is international. Tell us your trade lane and we'll tell you how we can help.",
+    "image": "/images/photos/global-port-sunset.jpg",
+    "imageAlt": "Container port at sunset, seen from above",
+    "cta": { "label": "About our global reach", "href": "/global-reach" }
+  },
+  "cta": {
+    "title": "Have a shipment in mind?",
+    "text": "Send the details and we'll come back with options and a quote."
+  }
+}

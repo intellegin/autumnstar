@@ -1,0 +1,16 @@
+{
+  "seo": {
+    "title": "Contact",
+    "description": "Contact Autumn Star about ocean freight, air freight, ground transportation or a general shipping question."
+  },
+  "hero": {
+    "title": "Contact us",
+    "text": "Questions about a shipment, a service or working together? Send us a message.",
+    "image": "/images/photos/contact-ship-sunset.jpg",
+    "imageAlt": "Ship silhouette under an orange sunset"
+  },
+  "topics": ["General question", "Ocean freight", "Air freight", "Ground transportation", "Freight coordination", "Supply chain solutions", "Partnership"],
+  "quoteNote": "Need pricing for a specific shipment? The quote form asks for everything we need.",
+  "successText": "Thanks. Your message has been received. Keep this reference number for any follow-up.",
+  "errorText": "Sorry, your message could not be sent. Please try again later."
+}

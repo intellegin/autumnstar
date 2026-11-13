@@ -1,0 +1,13 @@
+{
+  "seo": {
+    "title": "Shipping & Logistics Services",
+    "description": "Ocean freight, air freight, ground transportation, freight coordination and supply chain solutions from Autumn Star."
+  },
+  "hero": {
+    "title": "Shipping & logistics services",
+    "text": "Ocean freight worldwide is our focus. Air, ground and coordination complete the route.",
+    "image": "/images/photos/services-containers.jpg",
+    "imageAlt": "Orange shipping containers against a dark sky"
+  },
+  "note": "Every shipment is different. Services are arranged to fit each request, so ask us about your specific cargo and route."
+}

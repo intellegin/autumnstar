@@ -1,0 +1,26 @@
+{
+  "seo": {
+    "title": "Global Reach",
+    "description": "Autumn Star's international shipping focus: ocean freight worldwide, connected by air and ground. Ask about your trade lane."
+  },
+  "hero": {
+    "title": "Global reach",
+    "text": "International shipping is at the centre of what we do.",
+    "image": "/images/photos/global-port-sunset.jpg",
+    "imageAlt": "Container port at sunset, seen from above"
+  },
+  "intro": "Autumn Star focuses on international freight, moving goods by sea between countries, with air and ground transportation to connect the legs before and after.",
+  "pillars": [
+    { "icon": "ship", "title": "Ocean freight worldwide", "text": "Our primary focus: international sea shipments for businesses that trade across borders." },
+    { "icon": "plane", "title": "Air when it matters", "text": "International air cargo for shipments that need to move faster." },
+    { "icon": "truck", "title": "Connected on the ground", "text": "Trucking, parcel and last-mile moves link ports and airports to your door." }
+  ],
+  "lanes": {
+    "title": "Ask about your trade lane",
+    "text": "Service regions and routes are confirmed with each request. Tell us where your goods are coming from and going to, and we'll tell you how we can help.",
+    "image": "/images/photos/ship-loading-aerial.jpg",
+    "imageAlt": "Container ship being loaded at a terminal, seen from above"
+  },
+  "_regionsHelp": "TODO (owner): list confirmed service regions here when available. The section stays hidden while empty.",
+  "regions": []
+}

@@ -1,0 +1,30 @@
+{
+  "seo": {
+    "title": "About Us",
+    "description": "Autumn Star is a shipping and logistics company focused on ocean freight worldwide, built around clear communication and long-term customer relationships."
+  },
+  "hero": {
+    "title": "About Autumn Star",
+    "text": "A shipping and logistics partner for businesses that trade internationally.",
+    "image": "/images/photos/about-ship-horizon.jpg",
+    "imageAlt": "Container ship on the horizon under a pink sky"
+  },
+  "intro": "Autumn Star is a shipping and logistics company serving businesses with international shipping needs. Our focus is ocean freight worldwide, supported by air freight, ground transportation and the coordination that ties a shipment together.",
+  "_storyHelp": "TODO (owner): add company background, one paragraph per entry. Hidden while empty.",
+  "story": [],
+  "mission": {
+    "title": "Our mission",
+    "text": "To make international shipping straightforward for the businesses we serve, so their goods move reliably from origin to destination."
+  },
+  "philosophy": {
+    "title": "How we work",
+    "items": [
+      { "icon": "chat", "title": "Clear communication", "text": "Straight answers on options, pricing and progress." },
+      { "icon": "route", "title": "Practical planning", "text": "Routes and modes chosen to fit the shipment, not the other way around." },
+      { "icon": "handshake", "title": "Long-term relationships", "text": "We want to be the logistics partner you come back to." },
+      { "icon": "shield", "title": "Reliability", "text": "Careful coordination at every handoff." }
+    ]
+  },
+  "image": "/images/photos/freight-coordination.jpg",
+  "imageAlt": "Container terminal from above with stacked containers and equipment"
+}
