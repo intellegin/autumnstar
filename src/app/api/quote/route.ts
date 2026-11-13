@@ -23,13 +23,13 @@ export async function POST(request: Request) {
 
   const reference = newReference("Q");
   const route = `${q.origin}, ${q.originCountry} → ${q.destination}, ${q.destinationCountry}`;
-  const result = await sendInquiry({
+  const { result, status } = await sendInquiry({
     reference,
     subject: `[${reference}] Quote request: ${q.mode} · ${route}`.slice(0, 200),
     heading: "New quote request from autumnstar.ca",
     rows: quoteRows(q),
     replyTo: q.email,
   });
-  if (result !== "sent") return NextResponse.json({ ok: false, code: result }, { status: result === "not_configured" ? 503 : 502 });
+  if (result !== "sent") return NextResponse.json({ ok: false, code: result, ...(status ? { providerStatus: status } : {}) }, { status: result === "not_configured" ? 503 : 502 });
   return NextResponse.json({ ok: true, reference });
 }

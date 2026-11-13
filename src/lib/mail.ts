@@ -38,13 +38,14 @@ export function newReference(kind: "Q" | "C"): string {
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-export type SendResult = "sent" | "not_configured" | "failed";
+/** "failed" carries Mailgun's HTTP status (e.g. 401 bad key, 403 domain not allowed/unverified, 404 unknown domain) for diagnosis. */
+export type SendResult = { result: "sent" | "not_configured" | "failed"; status?: number };
 
 export async function sendInquiry(opts: { subject: string; heading: string; rows: [string, string][]; replyTo: string; reference: string }): Promise<SendResult> {
   const cfg = getMailgunConfig();
   if (!cfg) {
     console.error(`[inquiry] ${opts.reference} not sent: Mailgun not configured (MAILGUN_API_KEY is missing)`);
-    return "not_configured";
+    return { result: "not_configured" };
   }
   const text = `${opts.heading}\nReference: ${opts.reference}\n\n` + opts.rows.map(([k, v]) => `${k}: ${v}`).join("\n");
   const html =
@@ -60,11 +61,11 @@ export async function sendInquiry(opts: { subject: string; heading: string; rows
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
       console.error(`[inquiry] ${opts.reference} Mailgun send failed: status=${res.status} domain=${cfg.domain} body=${detail.slice(0, 300)}`);
-      return "failed";
+      return { result: "failed", status: res.status };
     }
-    return "sent";
+    return { result: "sent" };
   } catch (err) {
     console.error(`[inquiry] ${opts.reference} Mailgun request error: ${(err as Error).message}`);
-    return "failed";
+    return { result: "failed" };
   }
 }
