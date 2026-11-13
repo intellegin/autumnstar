@@ -21,8 +21,6 @@
   --gold: #f4b23d;         /* small highlights on navy (7.5:1) */
   --sand: #e8ddc8;
   --sand-50: #f7f3ec;
-  --sage: #6b7a64;
-  --sage-100: #e4e9e1;
   /* Neutrals */
   --white: #ffffff;
   --text: #16212a;
@@ -31,8 +29,8 @@
   --line: #d8dfe6;
   --danger: #b42318;
 
-  --font-head: var(--font-sora), "Segoe UI", system-ui, sans-serif;
-  --font-body: var(--font-plex), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-head: var(--font-lato), "Segoe UI", system-ui, sans-serif;
+  --font-body: var(--font-lato), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   --radius: 6px;
   --notch: 22px;
@@ -47,10 +45,10 @@ body { margin: 0; background: var(--white); color: var(--text); font: 400 1.0625
 body.lock { overflow: hidden; }
 img, svg { display: block; max-width: 100%; }
 a { color: inherit; }
-h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 700; letter-spacing: -0.025em; line-height: 1.08; margin: 0 0 0.5em; }
+h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 900; letter-spacing: -0.015em; line-height: 1.08; margin: 0 0 0.5em; }
 h1 { font-size: clamp(2.5rem, 5.4vw, 4.4rem); }
 h2 { font-size: clamp(1.9rem, 3.4vw, 2.8rem); }
-h3 { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; }
+h3 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.005em; line-height: 1.2; }
 p { margin: 0 0 1em; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
@@ -210,7 +208,7 @@ button { font: inherit; color: inherit; }
 .split-media img { object-fit: cover; }
 .checks { display: grid; gap: 0.75rem; margin-top: 1.5rem; }
 .checks li { display: flex; gap: 0.7rem; align-items: flex-start; font-weight: 500; }
-.checks svg { flex: none; margin-top: 0.2rem; color: var(--sage); }
+.checks svg { flex: none; margin-top: 0.2rem; color: var(--orange); }
 .section-navy .checks svg { color: var(--gold); }
 
 /* Global band: navy with photo on the right edge */
@@ -224,9 +222,8 @@ button { font: inherit; color: inherit; }
 /* CTA panel */
 .cta { position: relative; overflow: hidden; background: var(--navy-950); color: var(--white); }
 .cta-inner { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 2rem; padding: clamp(3rem, 6vw, 4.5rem) 0; }
-.cta h2 { margin-bottom: 0.25em; }
+.cta h2 { margin-bottom: 0.25em; text-transform: uppercase; letter-spacing: 0.01em; }
 .cta p { margin: 0; color: rgba(255, 255, 255, 0.78); font-size: 1.1rem; }
-.cta-mark { position: absolute; right: -60px; top: 50%; width: 360px; transform: translateY(-50%); opacity: 0.08; }
 .cta-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; flex: none; position: relative; }
 
 /* Cards (notched) */

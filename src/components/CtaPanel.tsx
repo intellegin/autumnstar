@@ -1,12 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "./Icon";
 
-/** Closing call to action: deep navy, faint logo mark, orange quote button. */
+/** Closing call to action: deep navy, uppercase title (the one place headlines go uppercase), orange quote button. */
 export function CtaPanel({ title, text, href = "/quote", label = "Request a Quote" }: { title: string; text?: string; href?: string; label?: string }) {
   return (
     <section className="cta" aria-label={title}>
-      <Image className="cta-mark" src="/brand/mark.png" alt="" width={600} height={543} aria-hidden="true" />
       <div className="container cta-inner">
         <div>
           <h2>{title}</h2>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans, Sora } from "next/font/google";
+import { Lato } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
@@ -7,9 +7,8 @@ import { Analytics } from "@/components/Analytics";
 import { phone, site } from "@/lib/content";
 import "./globals.css";
 
-// Self-hosted at build time by next/font (no runtime requests to Google).
-const sora = Sora({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-sora", display: "swap" });
-const plex = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-plex", display: "swap" });
+// Lato, per the Autumn Star Brand Guide. Self-hosted at build time by next/font (no runtime requests to Google).
+const lato = Lato({ subsets: ["latin"], weight: ["400", "700", "900"], variable: "--font-lato", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -53,7 +52,7 @@ function organization() {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-CA" className={`${sora.variable} ${plex.variable}`}>
+    <html lang="en-CA" className={lato.variable}>
       <body>
         <a className="skip-link" href="#main">Skip to content</a>
         <Header />
