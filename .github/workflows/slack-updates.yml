@@ -1,0 +1,51 @@
+# Posts repo updates to Slack (#intellegin-dev):
+#   - every push to main: who pushed + the commits (with links)
+#   - every Vercel Production deployment result: live (with URL) or failed
+# Needs the repository secret SLACK_WEBHOOK_URL (a Slack incoming webhook for the channel).
+# Without it the job skips quietly. No third-party actions: plain curl + jq on the runner.
+name: Slack updates
+
+on:
+  push:
+    branches: [main]
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'push' ||
+      (startsWith(github.event.deployment_status.environment, 'Production') &&
+       contains(fromJSON('["success","failure","error"]'), github.event.deployment_status.state))
+    steps:
+      - name: Post to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "SLACK_WEBHOOK_URL is not set; skipping."; exit 0; fi
+          E="$GITHUB_EVENT_PATH"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          # Slack mrkdwn needs &, < and > escaped in free text
+          ESC='def esc: gsub("&";"&amp;") | gsub("<";"&lt;") | gsub(">";"&gt;");'
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            N=$(jq '.commits | length' "$E")
+            [ "$N" -eq 0 ] && { echo "No commits; skipping."; exit 0; }
+            TEXT=$(jq -r --arg repo "$REPO" "$ESC"'
+              ":package: *\($repo)*: \(.commits | length) new commit\(if (.commits | length) == 1 then "" else "s" end) on `main` by \(.pusher.name | esc)\n"
+              + ([.commits[-10:][] | "• <\(.url)|`\(.id[0:7])`> \(.message | split("\n")[0] | esc)"] | join("\n"))
+              + (if (.commits | length) > 10 then "\n…and \((.commits | length) - 10) more" else "" end)
+              + "\n<\(.compare)|View changes>"' "$E")
+          else
+            TEXT=$(jq -r --arg repo "$REPO" '
+              .deployment_status as $s
+              | if $s.state == "success"
+                then ":white_check_mark: *\($repo)* deployed to production: <\($s.environment_url // $s.target_url)|open site> (`\(.deployment.sha[0:7])`)"
+                else ":x: *\($repo)* production deployment \($s.state): <\($s.target_url // $s.log_url)|view logs> (`\(.deployment.sha[0:7])`)"
+                end' "$E")
+          fi
+          jq -n --arg text "$TEXT" '{text: $text, unfurl_links: false, unfurl_media: false}' \
+            | curl -sS -f -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
+          echo "Posted to Slack."
