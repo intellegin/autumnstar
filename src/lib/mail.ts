@@ -43,7 +43,7 @@ export type SendResult = "sent" | "not_configured" | "failed";
 export async function sendInquiry(opts: { subject: string; heading: string; rows: [string, string][]; replyTo: string; reference: string }): Promise<SendResult> {
   const cfg = getMailgunConfig();
   if (!cfg) {
-    console.error(`[inquiry] ${opts.reference} not sent: Mailgun not configured (MAILGUN_API_KEY and QUOTE_TO are required)`);
+    console.error(`[inquiry] ${opts.reference} not sent: Mailgun not configured (MAILGUN_API_KEY is missing)`);
     return "not_configured";
   }
   const text = `${opts.heading}\nReference: ${opts.reference}\n\n` + opts.rows.map(([k, v]) => `${k}: ${v}`).join("\n");

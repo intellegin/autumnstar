@@ -2,7 +2,7 @@
 
 Website for **Autumn Star Shipping & Logistics**: *Moving Business Across Borders.*
 
-Next.js (App Router) on Vercel. Every page is pre-rendered as static HTML; the only server code is two form endpoints, `/api/quote` and `/api/contact`.
+Next.js (App Router) on Vercel. The design follows the Autumn Star Brand Guide: about 70% navy and neutrals, 20% orange, 10% gold, with Lato type. Every page is pre-rendered as static HTML; the only server code is two form endpoints, `/api/quote` and `/api/contact`.
 
 > This repository is **public**. Never commit secrets, `.env` files or customer data. API keys live in Vercel environment variables.
 
@@ -38,10 +38,10 @@ The reference number appears in the email subject and on the success screen; thi
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
 | `MAILGUN_API_KEY` | **yes** | none | Mailgun API key |
-| `QUOTE_TO` | **yes** | none | Inbox that receives quote and contact requests |
-| `MAILGUN_DOMAIN` | recommended | `mail.autumnstar.ca` | Mailgun sending domain |
-| `QUOTE_FROM` | no | `Autumn Star <quotes@mail.autumnstar.ca>` | Sender |
-| `MAILGUN_API_BASE` | no | `https://api.mailgun.net` | Only for EU Mailgun accounts: `https://api.eu.mailgun.net` |
+| `MAILGUN_DOMAIN` | no | `autumnstar.ca` | Mailgun sending domain |
+| `QUOTE_TO` | no | `admin@autumnstar.ca` | Inbox that receives quote and contact requests |
+| `QUOTE_FROM` | no | `Autumn Star <admin@autumnstar.ca>` | Sender |
+| `MAILGUN_API_BASE` | no | `https://api.mailgun.net` (US) | Only for EU Mailgun accounts: `https://api.eu.mailgun.net` |
 
 Redeploy after changing environment variables.
 

@@ -6,14 +6,14 @@ export type MailgunConfig = { apiKey: string; domain: string; apiBase: string; f
 
 export function getMailgunConfig(): MailgunConfig | null {
   const apiKey = process.env.MAILGUN_API_KEY?.trim();
-  const to = process.env.QUOTE_TO?.trim(); // recipient not confirmed yet, so no default
-  if (!apiKey || !to) return null;
+  if (!apiKey) return null;
   return {
     apiKey,
-    to,
-    domain: process.env.MAILGUN_DOMAIN?.trim() || "mail.autumnstar.ca",
+    // Safe defaults (owner-confirmed), so mail still works if a variable is missing or named differently.
+    to: process.env.QUOTE_TO?.trim() || "admin@autumnstar.ca",
+    domain: process.env.MAILGUN_DOMAIN?.trim() || "autumnstar.ca",
     // US region by default; EU accounts set https://api.eu.mailgun.net
     apiBase: (process.env.MAILGUN_API_BASE?.trim() || "https://api.mailgun.net").replace(/\/+$/, ""),
-    from: process.env.QUOTE_FROM?.trim() || "Autumn Star <quotes@mail.autumnstar.ca>",
+    from: process.env.QUOTE_FROM?.trim() || "Autumn Star <admin@autumnstar.ca>",
   };
 }
