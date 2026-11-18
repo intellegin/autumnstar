@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Icon } from "./Icon";
+import { useFormToken } from "./useFormToken";
 import { QUOTE_STEPS, normalizeQuote, quoteRows, validateQuote, type Errors, type Quote, type QuoteField } from "@/lib/inquiry";
 
 type Mode = { value: string; label: string; icon: string; types: string[] };
@@ -22,7 +23,7 @@ type Status = "idle" | "sending" | "sent" | "error";
 export function QuoteForm({ modes, directions, packaging, weightUnits, successText, errorText }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const startedAt = useRef(Date.now());
+  const ensureToken = useFormToken("quote");
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -86,7 +87,7 @@ export function QuoteForm({ modes, directions, packaging, weightUnits, successTe
       const res = await fetch("/api/quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...quote, website: honey, startedAt: startedAt.current }),
+        body: JSON.stringify({ ...quote, website: honey, token: await ensureToken() }),
       });
       const data = await res.json().catch(() => ({}));
       if (data.ok && data.reference) {

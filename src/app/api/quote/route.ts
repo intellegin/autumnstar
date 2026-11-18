@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { normalizeQuote, quoteRows, validateQuote } from "@/lib/inquiry";
-import { isBot, newReference, rateLimited, sendInquiry } from "@/lib/mail";
+import { newReference, rateLimited, sendInquiry, spamCheck } from "@/lib/mail";
 
 export const runtime = "nodejs";
 
@@ -12,7 +12,9 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ ok: false, code: "invalid" }, { status: 400 });
   }
-  if (isBot(body)) return NextResponse.json({ ok: true, reference: newReference("Q") });
+  const spam = spamCheck(body, "quote");
+  if (spam === "bot") return NextResponse.json({ ok: true, reference: newReference("Q") }); // same as a success
+  if (spam === "not_configured") return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (rateLimited(ip)) return NextResponse.json({ ok: false, code: "rate_limited" }, { status: 429 });

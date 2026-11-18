@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
+import { useFormToken } from "./useFormToken";
 import { normalizeContact, validateContact, type ContactField, type Errors } from "@/lib/inquiry";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
 /** General contact form. The API assigns a reference number shown on success. */
 export function ContactForm({ topics, successText, errorText }: { topics: string[]; successText: string; errorText: string }) {
-  const startedAt = useRef(Date.now());
+  const ensureToken = useFormToken("contact");
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Errors<ContactField>>({});
   const [reference, setReference] = useState("");
@@ -28,7 +29,7 @@ export function ContactForm({ topics, successText, errorText }: { topics: string
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...c, website: raw.website ?? "", startedAt: startedAt.current }),
+        body: JSON.stringify({ ...c, website: raw.website ?? "", token: await ensureToken() }),
       });
       const data = await res.json().catch(() => ({}));
       if (data.ok && data.reference) {

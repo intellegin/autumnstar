@@ -4,7 +4,7 @@
  */
 import { randomBytes } from "node:crypto";
 import { getMailgunConfig } from "./config";
-import { LIMITS } from "./inquiry";
+import { verifyToken, type FormName } from "./formToken";
 
 // Best-effort per-IP limit (serverless instances don't share memory).
 const WINDOW_MS = 10 * 60 * 1000;
@@ -20,11 +20,20 @@ export function rateLimited(ip: string): boolean {
   return recent.length > MAX_PER_WINDOW;
 }
 
-/** Honeypot filled or form submitted faster than a person could: treat as a bot. */
-export function isBot(body: Record<string, unknown>): boolean {
-  const startedAt = Number(body.startedAt);
-  const tooFast = !Number.isFinite(startedAt) || Date.now() - startedAt < LIMITS.minFillMs;
-  return (typeof body.website === "string" && body.website !== "") || tooFast;
+/**
+ * Server-side spam checks (finding F-005): the hidden honeypot field must be empty and the
+ * signed time token must be valid (genuine, same form, not too fast, not expired).
+ * Returns "ok", "bot" (answer exactly like a success so bots learn nothing) or "not_configured".
+ */
+export function spamCheck(body: Record<string, unknown>, form: FormName): "ok" | "bot" | "not_configured" {
+  const honeypotFilled = typeof body.website === "string" && body.website !== "";
+  const token = verifyToken(body.token, form);
+  if (!token.ok && token.reason === "no_key") return "not_configured";
+  if (honeypotFilled || !token.ok) {
+    console.warn(`[inquiry] ${form} submission refused as spam: ${honeypotFilled ? "honeypot" : (token as { reason: string }).reason}`);
+    return "bot";
+  }
+  return "ok";
 }
 
 /** Inquiry reference, e.g. AS-Q-261113-7KQ2 (Q = quote, C = contact). Unambiguous characters only. */
