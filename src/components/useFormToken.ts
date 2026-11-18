@@ -1,39 +1,51 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { LIMITS } from "@/lib/inquiry";
 
-const REFRESH_MS = 30 * 60 * 1000; // server tokens expire after 2h; refresh well before
+const REFRESH_AFTER_MS = 90 * 60 * 1000; // server tokens expire 2h after issue; refresh well before
+
+type TokenState = { token: string; receivedAt: number; readyAt: number };
 
 /**
- * Fetches a signed time token for a form when the page loads and keeps it fresh.
- * `ensureToken()` returns a token that is old enough for the server's minimum fill time,
- * waiting briefly if one had to be fetched just now, so real people never hit the bot path.
+ * Signed form time token (security finding F-005).
+ * A token is fetched when the form loads. `ensureToken()` refreshes it when it is older than 90 min,
+ * measured by wall-clock age (not a timer, so laptop sleep can't leave it stale), or when `force` is set
+ * after the server answered "token_expired". The previous token is sent along so the page's original
+ * start time carries over, and the server says how long to wait (minimum fill time), so a refresh +
+ * retry is never mistaken for a too-fast bot.
  */
 export function useFormToken(form: "quote" | "contact") {
-  const state = useRef<{ token: string; receivedAt: number } | null>(null);
+  const state = useRef<TokenState | null>(null);
 
   const fetchToken = useCallback(async () => {
     try {
-      const res = await fetch(`/api/form-token?form=${form}`, { cache: "no-store" });
+      const prev = state.current?.token;
+      const qs = new URLSearchParams({ form, ...(prev ? { prev } : {}) });
+      const res = await fetch(`/api/form-token?${qs}`, { cache: "no-store" });
       const data = await res.json().catch(() => ({}));
-      if (data.ok && typeof data.token === "string") state.current = { token: data.token, receivedAt: Date.now() };
+      if (data.ok && typeof data.token === "string") {
+        const now = Date.now();
+        state.current = { token: data.token, receivedAt: now, readyAt: now + (Number(data.minWaitMs) || 0) };
+      }
     } catch {
-      /* offline or not configured: the submit will report the error */
+      /* offline or not configured: the submit reports the error */
     }
   }, [form]);
 
   useEffect(() => {
     fetchToken();
-    const id = window.setInterval(fetchToken, REFRESH_MS);
-    return () => window.clearInterval(id);
   }, [fetchToken]);
 
-  return useCallback(async (): Promise<string> => {
-    if (!state.current) await fetchToken();
-    if (!state.current) return "";
-    const wait = state.current.receivedAt + LIMITS.minFillMs + 400 - Date.now();
-    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-    return state.current.token;
-  }, [fetchToken]);
+  return useCallback(
+    async ({ force = false }: { force?: boolean } = {}): Promise<string> => {
+      const s = state.current;
+      if (force || !s || Date.now() - s.receivedAt > REFRESH_AFTER_MS) await fetchToken();
+      const t = state.current;
+      if (!t) return "";
+      const wait = t.readyAt + 300 - Date.now();
+      if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+      return t.token;
+    },
+    [fetchToken],
+  );
 }

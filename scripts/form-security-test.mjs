@@ -31,11 +31,18 @@ else {
   const KEY = process.env.TEST_KEY || "";
   const local = Boolean(KEY);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const getToken = async (form) => (await (await fetch(`${BASE}/api/form-token?form=${form}`, { cache: "no-store" })).json()).token;
-  const post = async (form, body) => (await fetch(`${BASE}/api/${form}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })).json();
-  const mintToken = (form, ts) => { // only possible with the key (local test)
-    const k = Buffer.from(hkdfSync("sha256", KEY, "autumnstar.ca", "as-form-token-v1", 32));
-    const p = `${form}.${ts}.${randomBytes(9).toString("base64url")}`; return `${p}.${createHmac("sha256", k).update(p).digest("base64url")}`;
+  const getTokenFull = async (form, prev) => (await fetch(`${BASE}/api/form-token?form=${form}${prev ? `&prev=${encodeURIComponent(prev)}` : ""}`, { cache: "no-store" })).json();
+  const getToken = async (form) => (await getTokenFull(form)).token;
+  // Each form's checks use their own documentation-range test IP so the per-IP limit (5 sends / 10 min)
+  // doesn't trip across the suite. (On Vercel, x-real-ip is set by the platform and can't be spoofed.)
+  const TEST_IP = { quote: "198.51.100.10", contact: "198.51.100.20" };
+  const post = async (form, body) => (await fetch(`${BASE}/api/${form}`, { method: "POST", headers: { "content-type": "application/json", "x-real-ip": TEST_IP[form] }, body: JSON.stringify(body) })).json();
+  // Mint a token the way the server does (only possible with the key, i.e. the local test).
+  const mintToken = (form, iat, start, keyMaterial = KEY) => {
+    const k = Buffer.from(hkdfSync("sha256", keyMaterial, "autumnstar.ca", "as-form-token-v1", 32));
+    const kid = createHmac("sha256", k).update("kid").digest("base64url").slice(0, 8);
+    const p = `${form}.${iat}.${start}.${randomBytes(9).toString("base64url")}.${kid}`;
+    return `${p}.${createHmac("sha256", k).update(p).digest("base64url")}`;
   };
   const bodies = {
     quote: { mode: "Ocean", origin: "Vancouver", originCountry: "Canada", destination: "Rotterdam", destinationCountry: "Netherlands", commodity: "TEST cargo", name: "TEST", email: "test@example.com", website: "" },
@@ -60,15 +67,15 @@ else {
     check(`${form}: too-fast submission refused (bot response, nothing sent)`, fast.ok === true && (base === null || (await mockCount()) === base));
     base = await mockCount();
     const missing = await post(form, { ...bodies[form] });
-    check(`${form}: missing token refused`, missing.ok === true && (base === null || (await mockCount()) === base));
+    check(`${form}: missing token → retryable token_expired (not a fake OK), nothing sent`, missing.ok === false && missing.code === "token_expired" && (base === null || (await mockCount()) === base));
     const real = await getToken(form); await sleep(3000);
     const forged = real.slice(0, -4) + (real.endsWith("AAAA") ? "BBBB" : "AAAA");
     base = await mockCount();
     const fr = await post(form, { ...bodies[form], token: forged });
     check(`${form}: forged signature refused`, fr.ok === true && (base === null || (await mockCount()) === base));
-    const [f, ts, rnd, sig] = real.split(".");
+    const [f, iat, st, rnd, kid, sig] = real.split(".");
     base = await mockCount();
-    const tamper = await post(form, { ...bodies[form], token: `${f}.${Number(ts) - 60000}.${rnd}.${sig}` });
+    const tamper = await post(form, { ...bodies[form], token: `${f}.${iat}.${Number(st) - 60000}.${rnd}.${kid}.${sig}` });
     check(`${form}: tampered timestamp refused`, tamper.ok === true && (base === null || (await mockCount()) === base));
     base = await mockCount();
     const other = form === "quote" ? "contact" : "quote";
@@ -79,9 +86,26 @@ else {
     const honey = await post(form, { ...bodies[form], website: "http://spam.example", token: real });
     check(`${form}: filled honeypot refused`, honey.ok === true && (base === null || (await mockCount()) === base));
     if (local) {
+      // Page left open > 2h: expired token → token_expired; the client refreshes (passing the old token,
+      // so the original start time carries over) and retries at once → delivered, not too_fast.
+      const old = Date.now() - 2 * 60 * 60 * 1000 - 60000;
+      const expiredTok = mintToken(form, old, old);
       base = await mockCount();
-      const expired = await post(form, { ...bodies[form], token: mintToken(form, Date.now() - 2 * 60 * 60 * 1000 - 60000) });
-      check(`${form}: expired token (2h+) refused`, expired.ok === true && (await mockCount()) === base);
+      const expired = await post(form, { ...bodies[form], token: expiredTok });
+      check(`${form}: expired token (2h+) → token_expired, nothing sent`, expired.ok === false && expired.code === "token_expired" && (await mockCount()) === base);
+      const fresh = await getTokenFull(form, expiredTok);
+      const retry = await post(form, { ...bodies[form], token: fresh.token });
+      check(`${form}: expired → refresh → immediate retry delivered (start time carried, minWait ${fresh.minWaitMs}ms)`, retry.ok === true && fresh.minWaitMs === 0 && (await mockCount()) === base + 1, `ref ${retry.reference}`);
+      // MAILGUN_API_KEY rotated while the page was open: old-key token → token_expired (not "forged");
+      // the fresh token can't vouch for the old start time, so the client waits minWaitMs, then delivers.
+      const rotated = mintToken(form, Date.now() - 60000, Date.now() - 60000, "previous-key");
+      base = await mockCount();
+      const rot = await post(form, { ...bodies[form], token: rotated });
+      check(`${form}: token from a rotated key → token_expired, nothing sent`, rot.ok === false && rot.code === "token_expired" && (await mockCount()) === base);
+      const fresh2 = await getTokenFull(form, rotated);
+      await sleep(fresh2.minWaitMs + 300);
+      const retry2 = await post(form, { ...bodies[form], token: fresh2.token });
+      check(`${form}: rotated key → refresh → retry after ${fresh2.minWaitMs}ms delivered`, retry2.ok === true && (await mockCount()) === base + 1, `ref ${retry2.reference}`);
     }
   }
   const failed = results.filter((r) => !r.pass).length;

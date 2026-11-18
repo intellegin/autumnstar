@@ -84,12 +84,16 @@ export function QuoteForm({ modes, directions, packaging, weightUnits, successTe
     }
     setStatus("sending");
     try {
-      const res = await fetch("/api/quote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...quote, website: honey, token: await ensureToken() }),
-      });
-      const data = await res.json().catch(() => ({}));
+      const post = async (force: boolean) => {
+        const res = await fetch("/api/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...quote, website: honey, token: await ensureToken({ force }) }),
+        });
+        return res.json().catch(() => ({}));
+      };
+      let data = await post(false);
+      if (data.code === "token_expired") data = await post(true); // stale page: fresh token, retry once
       if (data.ok && data.reference) {
         setResult({ reference: data.reference, rows: quoteRows(quote) });
         setStatus("sent");

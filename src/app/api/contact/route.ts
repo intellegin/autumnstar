@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { contactRows, normalizeContact, validateContact } from "@/lib/inquiry";
-import { newReference, rateLimited, sendInquiry, spamCheck } from "@/lib/mail";
+import { clientIp, newReference, rateLimited, sendInquiry, spamCheck } from "@/lib/mail";
 
 export const runtime = "nodejs";
 
@@ -14,9 +14,10 @@ export async function POST(request: Request) {
   }
   const spam = spamCheck(body, "contact");
   if (spam === "bot") return NextResponse.json({ ok: true, reference: newReference("C") }); // same as a success
+  if (spam === "retry") return NextResponse.json({ ok: false, code: "token_expired" }, { status: 409 }); // client refreshes + retries
   if (spam === "not_configured") return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = clientIp(request);
   if (rateLimited(ip)) return NextResponse.json({ ok: false, code: "rate_limited" }, { status: 429 });
 
   const c = normalizeContact(body);

@@ -21,19 +21,30 @@ export function rateLimited(ip: string): boolean {
 }
 
 /**
- * Server-side spam checks (finding F-005): the hidden honeypot field must be empty and the
- * signed time token must be valid (genuine, same form, not too fast, not expired).
- * Returns "ok", "bot" (answer exactly like a success so bots learn nothing) or "not_configured".
+ * Server-side spam checks (finding F-005).
+ * - "bot": honeypot filled, forged/malformed token, too fast, or another form's token. Answered exactly
+ *   like a success so bots learn nothing.
+ * - "retry": token missing, expired (page open > 2h) or signed with a previous key. Answered with a
+ *   retryable 409 "token_expired" so a real visitor's form fetches a fresh token and resubmits;
+ *   a genuine inquiry is never silently dropped.
  */
-export function spamCheck(body: Record<string, unknown>, form: FormName): "ok" | "bot" | "not_configured" {
+export function spamCheck(body: Record<string, unknown>, form: FormName): "ok" | "bot" | "retry" | "not_configured" {
   const honeypotFilled = typeof body.website === "string" && body.website !== "";
   const token = verifyToken(body.token, form);
   if (!token.ok && token.reason === "no_key") return "not_configured";
-  if (honeypotFilled || !token.ok) {
-    console.warn(`[inquiry] ${form} submission refused as spam: ${honeypotFilled ? "honeypot" : (token as { reason: string }).reason}`);
-    return "bot";
-  }
-  return "ok";
+  if (honeypotFilled) return refuse(form, "honeypot", "bot");
+  if (token.ok) return "ok";
+  return ["missing", "expired", "stale_key"].includes(token.reason) ? refuse(form, token.reason, "retry") : refuse(form, token.reason, "bot");
+}
+
+function refuse<T extends "bot" | "retry">(form: FormName, reason: string, result: T): T {
+  console.warn(`[inquiry] ${form} submission ${result === "bot" ? "refused as spam" : "asked to retry"}: ${reason}`);
+  return result;
+}
+
+/** Client IP on Vercel: x-real-ip, else the first x-forwarded-for entry, else "unknown". */
+export function clientIp(request: Request): string {
+  return request.headers.get("x-real-ip")?.trim() || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 }
 
 /** Inquiry reference, e.g. AS-Q-261113-7KQ2 (Q = quote, C = contact). Unambiguous characters only. */
