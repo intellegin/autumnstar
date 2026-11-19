@@ -37,11 +37,15 @@ The reference number appears in the email subject and on the success screen; thi
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
-| `MAILGUN_API_KEY` | **yes** | none | Mailgun API key |
-| `MAILGUN_DOMAIN` | no | `autumnstar.ca` | Mailgun sending domain |
-| `QUOTE_TO` | no | `admin@autumnstar.ca` | Inbox that receives quote and contact requests |
-| `QUOTE_FROM` | no | `Autumn Star <admin@autumnstar.ca>` | Sender |
-| `MAILGUN_API_BASE` | no | `https://api.mailgun.net` (US) | Only for EU Mailgun accounts: `https://api.eu.mailgun.net` |
+| `MAILGUN_API_KEY` | **yes** | none | A **domain sending key** for autumnstar.ca. The app only calls `POST /v3/<domain>/messages` (sending), so no account-wide key is needed. It also seeds the form-token signing key. |
+| `QUOTE_TO` | **yes** | none (no fallback) | Inbox that receives quote and contact requests. Without it the forms answer "not configured". |
+| `MAILGUN_DOMAIN` | recommended | `autumnstar.ca` | Mailgun sending domain |
+| `QUOTE_FROM` | no | `Autumn Star <admin@autumnstar.ca>` | Sender (on the site's own domain) |
+| `MAILGUN_API_BASE` | no | `https://api.mailgun.net` | EU accounts: `https://api.eu.mailgun.net`. Any other value (the test mock) is ignored in production. |
+
+Email rules: the subject is fixed (`[AS-Q-…] New quote request` / `[AS-C-…] New contact message`, no visitor text). Visitor details are in the body only, HTML-escaped. Reply-To is set only for a strictly valid single address.
+
+Tests (mock Mailgun, never real email): `bash scripts/run-form-tests.sh`.
 
 Redeploy after changing environment variables.
 
