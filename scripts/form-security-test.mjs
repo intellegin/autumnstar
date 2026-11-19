@@ -2,7 +2,9 @@
 //
 // Usage (local):
 //   1) node scripts/form-security-test.mjs --mock-only        # starts the mock on :8795, leave running
-//   2) MAILGUN_API_KEY=test-key MAILGUN_API_BASE=http://127.0.0.1:8795 npm start   (in another shell)
+//   2) MAILGUN_API_KEY=test-key MAILGUN_API_BASE=http://127.0.0.1:8795 npm run dev   (in another shell)
+//      Must be dev mode: in production (NODE_ENV=production, e.g. `npm start` or Vercel) a non-Mailgun
+//      MAILGUN_API_BASE is ignored by design, so the mock would not be used.
 //   3) BASE=http://127.0.0.1:3000 TEST_KEY=test-key node scripts/form-security-test.mjs
 // Or point BASE at a preview URL without TEST_KEY: the checks that need the key (expired token,
 // and counting delivered mails) are skipped, and only refusals are tested, so nothing is sent.
