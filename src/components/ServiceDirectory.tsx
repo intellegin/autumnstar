@@ -4,7 +4,9 @@ import { Icon } from "./Icon";
 import type { Service } from "@/lib/content";
 
 /** Services as a directory of rows: photo, name, description, arrow. Ocean freight is flagged as the primary focus. */
-export function ServiceDirectory({ services, exclude }: { services: Service[]; exclude?: string }) {
+/** `headingLevel` 2 when the list sits directly under the page H1 (keeps the outline free of skipped levels). */
+export function ServiceDirectory({ services, exclude, headingLevel = 3 }: { services: Service[]; exclude?: string; headingLevel?: 2 | 3 }) {
+  const H = headingLevel === 2 ? "h2" : "h3";
   return (
     <div className="directory">
       {services.filter((s) => s.slug !== exclude).map((s) => (
@@ -13,7 +15,7 @@ export function ServiceDirectory({ services, exclude }: { services: Service[]; e
           <div className="dir-name">
             <Icon name={s.icon} size={30} strokeWidth={1.5} />
             <div>
-              <h3>{s.name}</h3>
+              <H className="h3">{s.name}</H>
               {s.featured && <span className="tag">Primary focus</span>}
             </div>
           </div>

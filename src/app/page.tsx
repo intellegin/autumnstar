@@ -8,14 +8,11 @@ import { RouteProcess } from "@/components/RouteProcess";
 import { CtaPanel } from "@/components/CtaPanel";
 import { Icon } from "@/components/Icon";
 import { getServices, pages, site } from "@/lib/content";
+import { pageMeta } from "@/lib/seo";
 
 const copy = pages.home;
 
-export const metadata = {
-  title: { absolute: `${site.shortName} | ${copy.seo.title}` },
-  description: copy.seo.description,
-  alternates: { canonical: "/" },
-};
+export const metadata = pageMeta({ absoluteTitle: `${site.shortName} | ${copy.seo.title}`, description: copy.seo.description, path: "/" });
 
 export default function Home() {
   const [first, ...rest] = copy.hero.title.split(" Across ");

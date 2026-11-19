@@ -5,10 +5,11 @@ import { Head } from "@/components/Head";
 import { CtaPanel } from "@/components/CtaPanel";
 import { Icon } from "@/components/Icon";
 import { pages } from "@/lib/content";
+import { pageMeta } from "@/lib/seo";
 
 const copy = pages.about;
 
-export const metadata: Metadata = { title: copy.seo.title, description: copy.seo.description, alternates: { canonical: "/about" } };
+export const metadata: Metadata = pageMeta({ title: copy.seo.title, description: copy.seo.description, path: "/about" });
 
 export default function AboutPage() {
   return (

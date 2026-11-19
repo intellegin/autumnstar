@@ -58,12 +58,12 @@ export function SiteNav({ nav, services, cta }: { nav: NavLink[]; services: Serv
         <Icon name={drawer ? "close" : "menu"} size={22} /> {drawer ? "Close" : "Menu"}
       </button>
       <nav id="mobile-menu" className={`drawer${drawer ? " is-open" : ""}`} aria-label="Mobile">
-        <h2>Services</h2>
+        <p className="drawer-label">Services</p>
         {services.map((s) => (
           <Link key={s.slug} href={`/services/${s.slug}`}><Icon name={s.icon} size={22} />{s.name}</Link>
         ))}
         <Link href="/services"><Icon name="arrow" size={22} />All services</Link>
-        <h2>Company</h2>
+        <p className="drawer-label">Company</p>
         {others.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}
         <Link href={cta.href}>{cta.label}</Link>
       </nav>

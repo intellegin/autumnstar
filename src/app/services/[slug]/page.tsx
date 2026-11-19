@@ -9,6 +9,7 @@ import { CtaPanel } from "@/components/CtaPanel";
 import { JsonLd } from "@/components/JsonLd";
 import { Icon } from "@/components/Icon";
 import { getService, getServices, site } from "@/lib/content";
+import { pageMeta } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -20,12 +21,12 @@ const modeFor: Record<string, string> = { "ocean-freight": "Ocean", "air-freight
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const s = getService((await params).slug);
   if (!s) return {};
-  return {
+  return pageMeta({
     title: s.name,
     description: s.summary,
-    alternates: { canonical: `/services/${s.slug}` },
-    openGraph: { images: [{ url: s.image, alt: s.imageAlt }] },
-  };
+    path: `/services/${s.slug}`,
+    image: { url: `/og/services/${s.slug}.jpg`, alt: `${s.name}, ${site.shortName}` },
+  });
 }
 
 export default async function ServicePage({ params }: Props) {
@@ -53,7 +54,7 @@ export default async function ServicePage({ params }: Props) {
                   ) : (
                     <span className="feature-icon"><Icon name={s.icon} size={24} /></span>
                   )}
-                  <div><h3>{x.title}</h3><p>{x.text}</p></div>
+                  <div><h2 className="h3">{x.title}</h2><p>{x.text}</p></div>
                 </div>
               ))}
             </div>
@@ -77,8 +78,10 @@ export default async function ServicePage({ params }: Props) {
       <CtaPanel title={`Ready to move your ${s.name.toLowerCase()} shipment?`} text="Send the details and we'll come back with options and a quote." href={quoteHref} />
 
       <JsonLd data={{
-        "@context": "https://schema.org", "@type": "Service", name: s.name, description: s.summary, serviceType: s.name,
-        url: `${site.url}/services/${s.slug}`, provider: { "@type": "Organization", name: site.displayName, url: site.url },
+        "@context": "https://schema.org", "@type": "Service", "@id": `${site.url}/services/${s.slug}#service`,
+        name: s.name, description: s.summary, serviceType: s.name, url: `${site.url}/services/${s.slug}`,
+        image: `${site.url}${s.image}`,
+        provider: { "@type": "Organization", "@id": `${site.url}/#organization`, name: site.displayName, url: site.url },
       }} />
     </>
   );

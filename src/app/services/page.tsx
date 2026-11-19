@@ -5,10 +5,11 @@ import { RouteProcess } from "@/components/RouteProcess";
 import { Head } from "@/components/Head";
 import { CtaPanel } from "@/components/CtaPanel";
 import { getServices, pages } from "@/lib/content";
+import { pageMeta } from "@/lib/seo";
 
 const copy = pages.services;
 
-export const metadata: Metadata = { title: copy.seo.title, description: copy.seo.description, alternates: { canonical: "/services" } };
+export const metadata: Metadata = pageMeta({ title: copy.seo.title, description: copy.seo.description, path: "/services" });
 
 export default function ServicesPage() {
   return (
@@ -17,7 +18,7 @@ export default function ServicesPage() {
         crumbs={[{ label: "Home", href: "/" }, { label: "Services", href: "/services" }]} />
       <section className="section">
         <div className="container">
-          <ServiceDirectory services={getServices()} />
+          <ServiceDirectory services={getServices()} headingLevel={2} />
           <p className="lead" style={{ marginTop: "2rem", maxWidth: "60ch" }}>{copy.note}</p>
         </div>
       </section>

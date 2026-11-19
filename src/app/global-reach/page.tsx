@@ -5,10 +5,11 @@ import { PageHero } from "@/components/PageHero";
 import { CtaPanel } from "@/components/CtaPanel";
 import { Icon } from "@/components/Icon";
 import { pages } from "@/lib/content";
+import { pageMeta } from "@/lib/seo";
 
 const copy = pages.globalReach;
 
-export const metadata: Metadata = { title: copy.seo.title, description: copy.seo.description, alternates: { canonical: "/global-reach" } };
+export const metadata: Metadata = pageMeta({ title: copy.seo.title, description: copy.seo.description, path: "/global-reach" });
 
 export default function GlobalReachPage() {
   const regions = copy.regions as string[];
@@ -23,7 +24,7 @@ export default function GlobalReachPage() {
             {copy.pillars.map((p, i) => (
               <div key={p.title} className={`card notch${i === 0 ? " card-navy" : ""}`}>
                 <Icon name={p.icon} size={34} strokeWidth={1.5} />
-                <h3>{p.title}</h3>
+                <h2 className="h3">{p.title}</h2>
                 <p>{p.text}</p>
               </div>
             ))}
