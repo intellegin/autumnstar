@@ -13,7 +13,20 @@ export function getMailgunConfig(): MailgunConfig | null {
     to: process.env.QUOTE_TO?.trim() || "admin@autumnstar.ca",
     domain: process.env.MAILGUN_DOMAIN?.trim() || "autumnstar.ca",
     // US region by default; EU accounts set https://api.eu.mailgun.net
-    apiBase: (process.env.MAILGUN_API_BASE?.trim() || "https://api.mailgun.net").replace(/\/+$/, ""),
+    apiBase: mailgunApiBase(),
     from: process.env.QUOTE_FROM?.trim() || "Autumn Star <admin@autumnstar.ca>",
   };
+}
+
+// Mailgun regions. In production only these are accepted (EU accounts set MAILGUN_API_BASE to the EU URL);
+// any other value, e.g. a local mock server used by the form tests, is ignored when NODE_ENV=production.
+const MAILGUN_API_BASES = ["https://api.mailgun.net", "https://api.eu.mailgun.net"];
+
+function mailgunApiBase(): string {
+  const requested = (process.env.MAILGUN_API_BASE?.trim() || "").replace(/\/+$/, "");
+  if (!requested) return MAILGUN_API_BASES[0];
+  if (MAILGUN_API_BASES.includes(requested)) return requested;
+  if (process.env.NODE_ENV !== "production") return requested; // test-only override (mock Mailgun)
+  console.warn("[mail] MAILGUN_API_BASE ignored in production (not an official Mailgun endpoint)");
+  return MAILGUN_API_BASES[0];
 }

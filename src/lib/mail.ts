@@ -4,7 +4,7 @@
  */
 import { randomBytes } from "node:crypto";
 import { getMailgunConfig } from "./config";
-import { LIMITS } from "./inquiry";
+import { verifyToken, type FormName } from "./formToken";
 
 // Best-effort per-IP limit (serverless instances don't share memory).
 const WINDOW_MS = 10 * 60 * 1000;
@@ -20,11 +20,31 @@ export function rateLimited(ip: string): boolean {
   return recent.length > MAX_PER_WINDOW;
 }
 
-/** Honeypot filled or form submitted faster than a person could: treat as a bot. */
-export function isBot(body: Record<string, unknown>): boolean {
-  const startedAt = Number(body.startedAt);
-  const tooFast = !Number.isFinite(startedAt) || Date.now() - startedAt < LIMITS.minFillMs;
-  return (typeof body.website === "string" && body.website !== "") || tooFast;
+/**
+ * Server-side spam checks (finding F-005).
+ * - "bot": honeypot filled, forged/malformed token, too fast, or another form's token. Answered exactly
+ *   like a success so bots learn nothing.
+ * - "retry": token missing, expired (page open > 2h) or signed with a previous key. Answered with a
+ *   retryable 409 "token_expired" so a real visitor's form fetches a fresh token and resubmits;
+ *   a genuine inquiry is never silently dropped.
+ */
+export function spamCheck(body: Record<string, unknown>, form: FormName): "ok" | "bot" | "retry" | "not_configured" {
+  const honeypotFilled = typeof body.website === "string" && body.website !== "";
+  const token = verifyToken(body.token, form);
+  if (!token.ok && token.reason === "no_key") return "not_configured";
+  if (honeypotFilled) return refuse(form, "honeypot", "bot");
+  if (token.ok) return "ok";
+  return ["missing", "expired", "stale_key"].includes(token.reason) ? refuse(form, token.reason, "retry") : refuse(form, token.reason, "bot");
+}
+
+function refuse<T extends "bot" | "retry">(form: FormName, reason: string, result: T): T {
+  console.warn(`[inquiry] ${form} submission ${result === "bot" ? "refused as spam" : "asked to retry"}: ${reason}`);
+  return result;
+}
+
+/** Client IP on Vercel: x-real-ip, else the first x-forwarded-for entry, else "unknown". */
+export function clientIp(request: Request): string {
+  return request.headers.get("x-real-ip")?.trim() || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 }
 
 /** Inquiry reference, e.g. AS-Q-261113-7KQ2 (Q = quote, C = contact). Unambiguous characters only. */

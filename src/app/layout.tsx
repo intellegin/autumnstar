@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { connection } from "next/server";
 import { Lato } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -50,7 +51,9 @@ function organization() {
   };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Render per request so Next.js can apply the CSP nonce from src/proxy.ts to its scripts.
+  await connection();
   return (
     <html lang="en-CA" className={lato.variable}>
       <body>

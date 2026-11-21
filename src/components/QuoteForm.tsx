@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Icon } from "./Icon";
+import { useFormToken } from "./useFormToken";
 import { QUOTE_STEPS, normalizeQuote, quoteRows, validateQuote, type Errors, type Quote, type QuoteField } from "@/lib/inquiry";
 
 type Mode = { value: string; label: string; icon: string; types: string[] };
@@ -22,7 +23,7 @@ type Status = "idle" | "sending" | "sent" | "error";
 export function QuoteForm({ modes, directions, packaging, weightUnits, successText, errorText }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const startedAt = useRef(Date.now());
+  const ensureToken = useFormToken("quote");
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -83,12 +84,16 @@ export function QuoteForm({ modes, directions, packaging, weightUnits, successTe
     }
     setStatus("sending");
     try {
-      const res = await fetch("/api/quote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...quote, website: honey, startedAt: startedAt.current }),
-      });
-      const data = await res.json().catch(() => ({}));
+      const post = async (force: boolean) => {
+        const res = await fetch("/api/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...quote, website: honey, token: await ensureToken({ force }) }),
+        });
+        return res.json().catch(() => ({}));
+      };
+      let data = await post(false);
+      if (data.code === "token_expired") data = await post(true); // stale page: fresh token, retry once
       if (data.ok && data.reference) {
         setResult({ reference: data.reference, rows: quoteRows(quote) });
         setStatus("sent");
