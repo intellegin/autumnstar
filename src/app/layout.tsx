@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
 import { Analytics } from "@/components/Analytics";
 import { phone, site } from "@/lib/content";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import "./globals.css";
 
 // Lato, per the Autumn Star Brand Guide. Self-hosted at build time by next/font (no runtime requests to Google).
@@ -16,7 +17,6 @@ export const metadata: Metadata = {
   title: { default: `${site.displayName} | ${site.tagline}`, template: `%s | ${site.shortName}` },
   description: site.description,
   applicationName: site.shortName,
-  alternates: { canonical: "/" },
   manifest: "/site.webmanifest",
   icons: {
     icon: [
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
   },
   appleWebApp: { capable: true, title: site.shortName, statusBarStyle: "black-translucent" },
   other: { "apple-mobile-web-app-capable": "yes" },
-  openGraph: { type: "website", siteName: site.displayName, locale: "en_CA", images: [{ url: "/og-image.png", width: 1200, height: 630, alt: site.displayName }] },
-  twitter: { card: "summary_large_image" },
+  openGraph: { type: "website", siteName: site.displayName, locale: "en_CA", images: [DEFAULT_OG_IMAGE] },
+  twitter: { card: "summary_large_image", images: [{ url: DEFAULT_OG_IMAGE.url, alt: DEFAULT_OG_IMAGE.alt }] },
 };
 
 export const viewport: Viewport = { themeColor: "#1f2e3a", width: "device-width", initialScale: 1 };
@@ -38,16 +38,33 @@ export const viewport: Viewport = { themeColor: "#1f2e3a", width: "device-width"
 function organization() {
   const p = phone();
   // Only true fields: contact details are added automatically once confirmed in content/site.json.
+  // LocalBusiness is not used: no street address is published.
   return {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    name: site.displayName,
-    alternateName: site.shortName,
-    url: site.url,
-    logo: `${site.url}/brand/logo.png`,
-    slogan: site.tagline,
-    ...(p ? { telephone: p.e164 } : {}),
-    ...(site.contact.email ? { email: site.contact.email } : {}),
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${site.url}/#organization`,
+        name: site.displayName,
+        alternateName: site.shortName,
+        url: site.url,
+        logo: { "@type": "ImageObject", url: `${site.url}/brand/logo.png`, width: 1056, height: 303 },
+        image: `${site.url}/og-image.png`,
+        description: site.description,
+        slogan: site.tagline,
+        ...(p ? { telephone: p.e164 } : {}),
+        ...(site.contact.email ? { email: site.contact.email } : {}),
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${site.url}/#website`,
+        name: site.shortName,
+        alternateName: site.displayName,
+        url: site.url,
+        inLanguage: "en-CA",
+        publisher: { "@id": `${site.url}/#organization` },
+      },
+    ],
   };
 }
 

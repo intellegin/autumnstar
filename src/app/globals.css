@@ -50,6 +50,8 @@ h1 { font-size: clamp(2.5rem, 5.4vw, 4.4rem); }
 h2 { font-size: clamp(1.9rem, 3.4vw, 2.8rem); }
 h3 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.005em; line-height: 1.2; }
 p { margin: 0 0 1em; }
+/* h2 that should look like an h3 (correct outline, same visual size) */
+h2.h3 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.005em; line-height: 1.2; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 button { font: inherit; color: inherit; }
@@ -185,12 +187,12 @@ button { font: inherit; color: inherit; }
 .dir-row:hover .dir-thumb img { transform: scale(1.05); }
 .dir-name { display: flex; align-items: center; gap: 0.8rem; }
 .dir-name svg { flex: none; color: var(--orange); }
-.dir-name h3 { margin: 0; font-size: 1.45rem; }
+.dir-name h3, .dir-name h2 { margin: 0; font-size: 1.45rem; }
 .dir-name .tag { margin-top: 0.35rem; }
 .dir-row p { margin: 0; color: var(--text-2); }
 .dir-arrow { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--line); color: var(--navy); transition: background-color 0.15s, color 0.15s, border-color 0.15s; }
 .dir-row:hover .dir-arrow { background: var(--orange); border-color: var(--orange); color: var(--ink); }
-.dir-row-featured .dir-name h3 { font-size: 1.75rem; }
+.dir-row-featured .dir-name h3, .dir-row-featured .dir-name h2 { font-size: 1.75rem; }
 
 /* Process: waypoints on a dashed route */
 .route { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
@@ -232,7 +234,7 @@ button { font: inherit; color: inherit; }
 .card { padding: 1.75rem; background: var(--white); border: 1px solid var(--line); }
 .section-tint .card { border-color: transparent; }
 .card svg { color: var(--orange); margin-bottom: 1rem; }
-.card h3 { margin-bottom: 0.4rem; }
+.card h3, .card h2 { margin-bottom: 0.4rem; }
 .card p { margin: 0; color: var(--text-2); }
 .card-navy { background: var(--navy); color: var(--white); border-color: var(--navy); }
 .card-navy p { color: rgba(255, 255, 255, 0.82); }
@@ -247,7 +249,7 @@ button { font: inherit; color: inherit; }
 .feature-list { display: grid; gap: 1.25rem; margin-top: 2.5rem; }
 .feature { display: grid; grid-template-columns: 52px 1fr; gap: 1.1rem; padding: 1.4rem; background: var(--navy-50); }
 .feature-icon { display: grid; place-items: center; width: 52px; height: 52px; background: var(--white); color: var(--orange); clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%); }
-.feature h3 { margin-bottom: 0.25rem; }
+.feature h3, .feature h2 { margin-bottom: 0.25rem; }
 .feature-photo { grid-template-columns: 180px 1fr; align-items: center; padding: 0; background: var(--white); border: 1px solid var(--line); }
 .feature-photo > div { padding: 1.1rem 1.25rem 1.1rem 0; }
 .feature-thumb { position: relative; display: block; height: 100%; min-height: 128px; overflow: hidden; }
@@ -350,7 +352,7 @@ button { font: inherit; color: inherit; }
   .menu-btn { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 48px; padding: 0 1rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--white); color: var(--navy); font-weight: 600; cursor: pointer; }
   .drawer { display: block; position: fixed; inset: calc(var(--header-h) + 1px) 0 0 0; z-index: 90; overflow-y: auto; padding: 1rem 1.25rem 7rem; background: var(--white); visibility: hidden; opacity: 0; transition: opacity 0.15s, visibility 0s 0.15s; }
   .drawer.is-open { visibility: visible; opacity: 1; transition: opacity 0.15s; }
-  .drawer h2 { font: 600 0.82rem/1 var(--font-body); color: var(--muted); letter-spacing: 0.04em; margin: 1.25rem 0 0.25rem; }
+  .drawer .drawer-label { font: 600 0.82rem/1 var(--font-body); color: var(--muted); letter-spacing: 0.04em; margin: 1.25rem 0 0.25rem; }
   .drawer a { display: flex; align-items: center; gap: 0.75rem; min-height: 54px; border-bottom: 1px solid var(--line); text-decoration: none; font: 600 1.15rem/1.2 var(--font-head); color: var(--navy); letter-spacing: -0.01em; }
   .drawer a svg { color: var(--orange); }
   .mobile-bar { display: grid; grid-template-columns: 1fr 1.4fr; gap: 0.5rem; position: fixed; left: 0; right: 0; bottom: 0; z-index: 95; padding: 0.6rem 0.75rem calc(0.6rem + env(safe-area-inset-bottom)); background: var(--navy); }
@@ -386,7 +388,7 @@ button { font: inherit; color: inherit; }
   .dir-row > p { grid-column: 1 / -1; grid-row: auto; }
   .dir-arrow { display: none; }
   .dir-thumb { grid-row: auto; }
-  .dir-name h3, .dir-row-featured .dir-name h3 { font-size: 1.2rem; }
+  .dir-name h3, .dir-name h2, .dir-row-featured .dir-name h3, .dir-row-featured .dir-name h2 { font-size: 1.2rem; }
   .dir-name svg { display: none; }
   .route { grid-template-columns: 1fr; }
   .cards, .cards-4, .subservices, .row-2, .row-3, .mode-grid { grid-template-columns: 1fr 1fr; }

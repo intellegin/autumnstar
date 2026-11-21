@@ -13,7 +13,12 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: { formats: ["image/avif", "image/webp"] },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Keep *.vercel.app aliases (previews and the production alias) out of search; only the
+      // custom domain is indexed. Avoids duplicate content against the canonical domain.
+      { source: "/:path*", has: [{ type: "host", value: "(?<host>.*)\\.vercel\\.app" }], headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
+    ];
   },
 };
 

@@ -58,6 +58,14 @@ None, by design: analytics aren't approved yet. If Vercel Web Analytics is appro
 
 All are generated from the approved logo files.
 
+## SEO and AI readability
+
+- **Site URL:** `url` in `content/site.json` (default `https://www.autumnstar.ca`) is the single setting used for canonical URLs, `og:url`, the sitemap, robots.txt, JSON-LD and llms.txt.
+- **Per-page metadata:** `src/lib/seo.ts` → `pageMeta()` (title, description, canonical, Open Graph, Twitter card).
+- **Share images (1200×630):** `public/og-image.png` (site) and `public/og/services/<slug>.jpg`. Add a card when you add a service.
+- **Structured data:** Organization + WebSite (layout), Service (service pages), BreadcrumbList (inner pages). No address, prices or ratings are published, so none are in the data.
+- **For AI assistants:** `/llms.txt` and `/llms-full.txt` are generated from `content/` (`src/lib/llms.ts`).
+
 ## Project structure
 
 ```

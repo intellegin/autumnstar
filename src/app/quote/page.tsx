@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/PageHero";
 import { QuoteForm } from "@/components/QuoteForm";
 import { pages } from "@/lib/content";
+import { pageMeta } from "@/lib/seo";
 
 const copy = pages.quote;
 
-export const metadata: Metadata = { title: copy.seo.title, description: copy.seo.description, alternates: { canonical: "/quote" } };
+export const metadata: Metadata = pageMeta({ title: copy.seo.title, description: copy.seo.description, path: "/quote" });
 
 export default function QuotePage() {
   return (

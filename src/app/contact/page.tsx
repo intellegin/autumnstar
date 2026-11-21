@@ -4,10 +4,11 @@ import { PageHero } from "@/components/PageHero";
 import { ContactForm } from "@/components/ContactForm";
 import { Icon } from "@/components/Icon";
 import { pages, phone, site } from "@/lib/content";
+import { pageMeta } from "@/lib/seo";
 
 const copy = pages.contact;
 
-export const metadata: Metadata = { title: copy.seo.title, description: copy.seo.description, alternates: { canonical: "/contact" } };
+export const metadata: Metadata = pageMeta({ title: copy.seo.title, description: copy.seo.description, path: "/contact" });
 
 export default function ContactPage() {
   const p = phone();
