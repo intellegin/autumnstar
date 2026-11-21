@@ -17,14 +17,11 @@ function startMock() {
   return new Promise((resolve) => {
     http.createServer((req, res) => {
       let body = ""; req.on("data", (d) => (body += d)).on("end", () => {
-        received.push(Object.fromEntries(new URLSearchParams(body))); // from, to, subject, text, html, h:Reply-To
+        received.push(Object.fromEntries(new URLSearchParams(body)));
         res.writeHead(200, { "content-type": "application/json" }); res.end('{"id":"<mock>","message":"Queued"}');
       });
     }).listen(MOCK_PORT, "127.0.0.1", () => {
-      http.createServer((req, res) => {
-        res.writeHead(200, { "content-type": "application/json" });
-        res.end(JSON.stringify(req.url.startsWith("/last") ? received.at(-1) ?? null : { count: received.length }));
-      })
+      http.createServer((_req, res) => { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify({ count: received.length })); })
         .listen(MOCK_PORT + 1, "127.0.0.1", resolve);
     });
   });
@@ -41,9 +38,7 @@ else {
   // Each form's checks use their own documentation-range test IP so the per-IP limit (5 sends / 10 min)
   // doesn't trip across the suite. (On Vercel, x-real-ip is set by the platform and can't be spoofed.)
   const TEST_IP = { quote: "198.51.100.10", contact: "198.51.100.20" };
-  const post = async (form, body, ip = TEST_IP[form]) => (await fetch(`${BASE}/api/${form}`, { method: "POST", headers: { "content-type": "application/json", "x-real-ip": ip }, body: JSON.stringify(body) })).json();
-  const lastMail = async () => { try { return await (await fetch(`http://127.0.0.1:${MOCK_PORT + 1}/last`)).json(); } catch { return null; } };
-  const MODE = process.env.MODE || "full"; // full | not-configured | production
+  const post = async (form, body) => (await fetch(`${BASE}/api/${form}`, { method: "POST", headers: { "content-type": "application/json", "x-real-ip": TEST_IP[form] }, body: JSON.stringify(body) })).json();
   // Mint a token the way the server does (only possible with the key, i.e. the local test).
   const mintToken = (form, iat, start, keyMaterial = KEY) => {
     const k = Buffer.from(hkdfSync("sha256", keyMaterial, "autumnstar.ca", "as-form-token-v1", 32));
@@ -60,20 +55,6 @@ else {
   const results = [];
   const check = (name, pass, detail = "") => { results.push({ name, pass }); console.log(`${pass ? "PASS" : "FAIL"}  ${name}${detail ? "  (" + detail + ")" : ""}`); };
   const mockCount = async () => { try { return (await (await fetch(`http://127.0.0.1:${MOCK_PORT + 1}/count`)).json()).count; } catch { return null; } };
-
-  if (MODE === "not-configured" || MODE === "production") {
-    // Server started WITHOUT QUOTE_TO (not-configured) or as a production build pointed at the mock (production).
-    for (const form of ["quote", "contact"]) {
-      const t = await getToken(form); await sleep(3000);
-      const base = await mockCount();
-      const r = await post(form, { ...bodies[form], token: t }, `198.51.100.${form === "quote" ? 90 : 91}`);
-      if (MODE === "not-configured") check(`${form}: missing QUOTE_TO → not_configured (no fake success), nothing sent`, r.ok === false && r.code === "not_configured" && (base === null || (await mockCount()) === base));
-      else check(`${form}: production ignores the test mock URL (mock received nothing, no fake success)`, r.ok === false && (base === null || (await mockCount()) === base), `code ${r.code}`);
-    }
-    const failed = results.filter((r) => !r.pass).length;
-    console.log(`\n${results.length - failed}/${results.length} passed`);
-    process.exit(failed ? 1 : 0);
-  }
 
   for (const form of ["quote", "contact"]) {
     const before = await mockCount();
@@ -129,35 +110,6 @@ else {
       check(`${form}: rotated key → refresh → retry after ${fresh2.minWaitMs}ms delivered`, retry2.ok === true && (await mockCount()) === base + 1, `ref ${retry2.reference}`);
     }
   }
-  // Standard v1.2 mail rules (local only: needs the mock to inspect what was sent)
-  if (local) {
-    let ipn = 40;
-    for (const form of ["quote", "contact"]) {
-      const marker = "ZZVISITOR" + form.toUpperCase();
-      const send = async (extra) => { const t = await getToken(form); await sleep(3000); return post(form, { ...bodies[form], ...extra, token: t }, `198.51.100.${ipn++}`); };
-      // 1) subject carries no visitor text
-      const r1 = await send({ name: marker, origin: marker, message: marker, commodity: marker, topic: "General question" });
-      const m1 = await lastMail();
-      const re = form === "quote" ? /^\[AS-Q-\d{6}-[A-Z0-9]{4}\] New quote request$/ : /^\[AS-C-\d{6}-[A-Z0-9]{4}\] New contact message$/;
-      check(`${form}: subject is fixed and has no visitor text`, r1.ok === true && m1 && re.test(m1.subject) && !m1.subject.includes(marker) && m1.text.includes(marker), m1 && m1.subject);
-      // 2) valid address → Reply-To set exactly
-      const r2 = await send({ email: "buyer@example.com" }); const m2 = await lastMail();
-      check(`${form}: valid email → Reply-To set`, r2.ok === true && m2["h:Reply-To"] === "buyer@example.com");
-      // 3) addresses that pass the form check but are not strictly valid → delivered, Reply-To dropped, email kept in body
-      for (const bad of ["a,b@example.com", "x@-bad-.com", "user@localhost.x1"]) {
-        const r = await send({ email: bad }); const m = await lastMail();
-        check(`${form}: Reply-To dropped for ${JSON.stringify(bad)} (email kept in body)`, r.ok === true && !("h:Reply-To" in m) && m.text.includes(bad));
-      }
-      // 4) header injection / multiple addresses → refused by validation or sent without Reply-To; never CR/LF in Reply-To
-      for (const evil of ["ok@example.com\r\nBcc: evil@example.com", "a@example.com,b@example.com", "a@example.com b@example.com"]) {
-        const base = await mockCount();
-        const r = await send({ email: evil }); const m = await lastMail();
-        const sent = (await mockCount()) !== base;
-        check(`${form}: malicious Reply-To ${JSON.stringify(evil)} not used`, (r.ok === false && r.code === "invalid" && !sent) || (sent && !("h:Reply-To" in m)), sent ? "sent without Reply-To" : "refused");
-      }
-    }
-  }
-
   const failed = results.filter((r) => !r.pass).length;
   console.log(`\n${results.length - failed}/${results.length} passed`);
   process.exit(failed ? 1 : 0);

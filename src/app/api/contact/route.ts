@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   const reference = newReference("C");
   const { result } = await sendInquiry({
     reference,
-    subject: `[${reference}] New contact message`, // fixed: no visitor text in the subject
+    subject: `[${reference}] Contact: ${c.topic || "General question"} · ${c.name}`.slice(0, 200),
     heading: "New contact message from autumnstar.ca",
     rows: contactRows(c),
     replyTo: c.email,

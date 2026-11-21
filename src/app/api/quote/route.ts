@@ -25,9 +25,10 @@ export async function POST(request: Request) {
   if (Object.keys(errors).length) return NextResponse.json({ ok: false, code: "invalid", errors }, { status: 422 });
 
   const reference = newReference("Q");
+  const route = `${q.origin}, ${q.originCountry} → ${q.destination}, ${q.destinationCountry}`;
   const { result } = await sendInquiry({
     reference,
-    subject: `[${reference}] New quote request`, // fixed: no visitor text in the subject
+    subject: `[${reference}] Quote request: ${q.mode} · ${route}`.slice(0, 200),
     heading: "New quote request from autumnstar.ca",
     rows: quoteRows(q),
     replyTo: q.email,
