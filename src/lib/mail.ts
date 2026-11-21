@@ -3,7 +3,8 @@
  * spam traps, rate limiting, reference numbers and Mailgun delivery.
  */
 import { randomBytes } from "node:crypto";
-import { getMailgunConfig } from "./config";
+import { getMailgunConfig, mailgunConfigMissing } from "./config";
+import { strictReplyTo } from "./replyTo";
 import { verifyToken, type FormName } from "./formToken";
 
 // Best-effort per-IP limit (serverless instances don't share memory).
@@ -61,10 +62,18 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 /** Mailgun's HTTP status on failure, for server-side diagnosis only (also written to the server log). Never sent to the browser. */
 export type SendResult = { result: "sent" | "not_configured" | "failed"; status?: number };
 
+/** Fixed subject (no visitor text). Reply-To only for a strictly valid single address. */
+function mailForm(cfg: { from: string; to: string }, opts: { subject: string; replyTo: string }, text: string, html: string) {
+  const form = new URLSearchParams({ from: cfg.from, to: cfg.to, subject: opts.subject, text, html, "o:tag": "website-inquiry" });
+  const replyTo = strictReplyTo(opts.replyTo);
+  if (replyTo) form.set("h:Reply-To", replyTo);
+  return form;
+}
+
 export async function sendInquiry(opts: { subject: string; heading: string; rows: [string, string][]; replyTo: string; reference: string }): Promise<SendResult> {
   const cfg = getMailgunConfig();
   if (!cfg) {
-    console.error(`[inquiry] ${opts.reference} not sent: Mailgun not configured (MAILGUN_API_KEY is missing)`);
+    console.error(`[inquiry] ${opts.reference} not sent: mail not configured (missing: ${mailgunConfigMissing().join(", ")})`);
     return { result: "not_configured" };
   }
   const text = `${opts.heading}\nReference: ${opts.reference}\n\n` + opts.rows.map(([k, v]) => `${k}: ${v}`).join("\n");
@@ -76,7 +85,7 @@ export async function sendInquiry(opts: { subject: string; heading: string; rows
     const res = await fetch(`${cfg.apiBase}/v3/${encodeURIComponent(cfg.domain)}/messages`, {
       method: "POST",
       headers: { Authorization: `Basic ${Buffer.from(`api:${cfg.apiKey}`).toString("base64")}` },
-      body: new URLSearchParams({ from: cfg.from, to: cfg.to, subject: opts.subject, text, html, "h:Reply-To": opts.replyTo, "o:tag": "website-inquiry" }),
+      body: mailForm(cfg, opts, text, html),
     });
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
